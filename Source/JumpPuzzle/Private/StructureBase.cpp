@@ -13,21 +13,26 @@ AStructureBase::AStructureBase()
 	IsColliding = false;
 	IsOnFlatSurface = false;
 	bIsSafeToPlace = false;
-	static ConstructorHelpers::FObjectFinder<UMaterial> ValidMaterial(TEXT("Material'/Game/Materials/M_BuildingPreview.M_BuildingPreview'"));
-	if (ValidMaterial.Object != NULL)
+	static ConstructorHelpers::FObjectFinder<UMaterial> TValidMaterial(TEXT("Material'/Game/Materials/M_BuildingPreview.M_BuildingPreview'"));
+	if (TValidMaterial.Object != NULL)
 	{
-		ValidPlacementMaterial = (UMaterial*)ValidMaterial.Object;
+		ValidMaterial = (UMaterial*)TValidMaterial.Object;
+
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> InvalidMaterial(TEXT("Material'/Game/Materials/M_BuildingPreviewInvalid.M_BuildingPreviewInvalid'"));
-	if (InvalidMaterial.Object != NULL)
+	static ConstructorHelpers::FObjectFinder<UMaterial> TInvalidMaterial(TEXT("Material'/Game/Materials/M_BuildingPreviewInvalid.M_BuildingPreviewInvalid'"));
+	if (TInvalidMaterial.Object != NULL)
 	{
-		InvalidPlacementMaterial = (UMaterial*)InvalidMaterial.Object;
+		InvalidMaterial = (UMaterial*)TInvalidMaterial.Object;
+	
 	}
 
 	PivotPoint = CreateDefaultSubobject<USceneComponent>(TEXT("PivotPoint"));
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PrimaryMesh"));
-	SetRootComponent(PivotPoint);
+
+
+	MeshComponent->SetupAttachment(PivotPoint);
+	AddOwnedComponent(PivotPoint);
 	PivotPoint->SetIsReplicated(true);
 	MeshComponent->SetIsReplicated(true); // Enable replication by default
 }
@@ -36,6 +41,12 @@ AStructureBase::AStructureBase()
 void AStructureBase::BeginPlay()
 {
 	Super::BeginPlay();
+	MeshComponent->AttachToComponent(PivotPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+	if (InvalidMaterial != nullptr && ValidMaterial != nullptr) {
+		ValidPlacementMaterial = UMaterialInstanceDynamic::Create(this->ValidMaterial, this);
+		InvalidPlacementMaterial = UMaterialInstanceDynamic::Create(this->InvalidMaterial, this);
+	}
 
 	//We call this at start because if the bool is false, then we won't show the clients the InvalidPlacement material
 	OnRep_IsSafeToPlace();
@@ -76,10 +87,10 @@ void AStructureBase::OnRep_IsSafeToPlace()
 	if (R_bIsPreview) {
 		UMaterialInstanceDynamic* R_ActiveMaterial;
 		if (bIsSafeToPlace) {
-			R_ActiveMaterial = UMaterialInstanceDynamic::Create(ValidPlacementMaterial, this);
+			R_ActiveMaterial = ValidPlacementMaterial;
 		}
 		else {
-			R_ActiveMaterial = UMaterialInstanceDynamic::Create(InvalidPlacementMaterial, this);
+			R_ActiveMaterial = InvalidPlacementMaterial;
 		}
 
 		MeshComponent->SetMaterial(0, R_ActiveMaterial);

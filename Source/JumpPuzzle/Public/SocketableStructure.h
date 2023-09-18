@@ -26,4 +26,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsSocketed;
 
+	UFUNCTION(BlueprintCallable)
+	void PivotTo(EPivotPoint ToPivotPoint);
+
 };

@@ -9,6 +9,21 @@
 #include <StructurePlacementDetector.h>
 #include "StructureBase.generated.h"
 
+UENUM(BlueprintType)
+enum ESnappingRule {
+	None,
+	Floor,
+	Wall,
+	Roof
+};
+
+UENUM(BlueprintType)
+enum EPivotPoint : uint8
+{
+	Start,
+	Center,
+	End
+};
 
 USTRUCT(BlueprintType)
 struct FStructureCost : public FTableRowBase {
@@ -80,40 +95,40 @@ public:
 
 	//Replication
 	UFUNCTION(BlueprintCallable)
-		virtual void OnRep_IsSafeToPlace();
+	virtual void OnRep_IsSafeToPlace();
 
 	UFUNCTION(BlueprintCallable)
-		virtual void OnRep_IsPreview();
+	virtual void OnRep_IsPreview();
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation)
-		void ServerPlacementSafetyChanged();
+	void ServerPlacementSafetyChanged();
 	void ServerPlacementSafetyChanged_Implementation();
 	bool ServerPlacementSafetyChanged_Validate();
 
 	UFUNCTION(BlueprintCallable)
-		void PlacementSafetyChanged();
+	void PlacementSafetyChanged();
 
 	UFUNCTION(Server, Reliable)
-		void ServerChangeMaterial(UMaterial* Material);
+	void ServerChangeMaterial(UMaterial* Material);
 
 	UFUNCTION(BlueprintCallable, Server, Unreliable, WithValidation)
-		void ServerUpdatePreviewTransform(FVector_NetQuantize Transform);
+	void ServerUpdatePreviewTransform(FVector_NetQuantize Transform);
 	void ServerUpdatePreviewTransform_Implementation(FVector_NetQuantize Transform);
 	bool ServerUpdatePreviewTransform_Validate(FVector_NetQuantize Transform);
 
 	UFUNCTION(BlueprintCallable)
-		void UpdatePreviewTransform(FVector_NetQuantize Transform);
+	void UpdatePreviewTransform(FVector_NetQuantize Transform);
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation)
-		void ServerUpdatePreviewRotation(FVector_NetQuantize Transform);
+	void ServerUpdatePreviewRotation(FVector_NetQuantize Transform);
 	void ServerUpdatePreviewRotation_Implementation(FVector_NetQuantize Transform);
 	bool ServerUpdatePreviewRotation_Validate(FVector_NetQuantize Transform);
 
 	UFUNCTION(BlueprintCallable)
-		void OnRep_CurrentTransform(FVector_NetQuantize Transform);
+	void OnRep_CurrentTransform(FVector_NetQuantize Transform);
 
 	UFUNCTION(BlueprintCallable)
-		void RegisterPlacementDetector(AStructurePlacementDetector* PlacementDetector);
+	void RegisterPlacementDetector(AStructurePlacementDetector* PlacementDetector);
 
 protected:
 	// Called when the game starts or when spawned
@@ -149,10 +164,16 @@ public:
 	TArray<AStructurePlacementDetector* > PlacementDetectors;
 
 	UPROPERTY();
-	UMaterial* ValidPlacementMaterial;
+	UMaterialInstanceDynamic* ValidPlacementMaterial;
 
 	UPROPERTY();
-	UMaterial* InvalidPlacementMaterial;
+	UMaterialInstanceDynamic* InvalidPlacementMaterial;
+
+	UPROPERTY();
+	UMaterial* ValidMaterial;
+
+	UPROPERTY();
+	UMaterial* InvalidMaterial;
 
 	UPROPERTY()
 	FTimerHandle UnusedHandle;
@@ -162,4 +183,13 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bShouldUpdatePreviewTransform = true;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TEnumAsByte<EPivotPoint> ActivePivotPoint = EPivotPoint::Center;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UShapeComponent* AttachedTo;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TEnumAsByte<ESnappingRule> SnappingRule;
 };
