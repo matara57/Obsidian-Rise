@@ -7,7 +7,9 @@
 #include <Engine/DataTable.h>
 #include "Net/UnrealNetwork.h"
 #include <StructurePlacementDetector.h>
+#include <GridPoint.h>
 #include "StructureBase.generated.h"
+
 
 UENUM(BlueprintType)
 enum ESnappingRule {
@@ -20,9 +22,11 @@ enum ESnappingRule {
 UENUM(BlueprintType)
 enum EPivotPoint : uint8
 {
-	Start,
-	Center,
-	End
+	Auto,
+	One,
+	Two,
+	Three,
+	Four
 };
 
 USTRUCT(BlueprintType)
@@ -182,14 +186,15 @@ public:
 	FVector_NetQuantize CurrentTransform;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	bool bShouldUpdatePreviewTransform = true;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TEnumAsByte<EPivotPoint> ActivePivotPoint = EPivotPoint::Center;
+	TEnumAsByte<EPivotPoint> ActivePivotPoint = EPivotPoint::Auto;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UShapeComponent* AttachedTo;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TEnumAsByte<ESnappingRule> SnappingRule;
+	
+	UPROPERTY(BlueprintReadWrite)
+	TMap<TEnumAsByte<EPivotPoint>, UGridPoint*> PlayerSelectablePivotPoints;
+
 };

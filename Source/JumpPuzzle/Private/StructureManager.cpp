@@ -20,9 +20,7 @@ UStructureManager::~UStructureManager()
 void UStructureManager::ServerPlaceStructure_Implementation(TSubclassOf<AStructureBase> Structure, FTransform Transform)
 {
 	FActorSpawnParameters SpawnInfo;
-	UE_LOG(LogTemp, Warning, TEXT("Hello"));
 	AStructureBase* SpawnedStructure = GetWorld()->SpawnActor<AStructureBase>(Structure, Transform, SpawnInfo);
-	SpawnedStructure->bShouldUpdatePreviewTransform = false;
 }
 
 bool UStructureManager::ServerPlaceStructure_Validate(TSubclassOf<AStructureBase> Structure, FTransform Transform)

@@ -135,7 +135,7 @@ bool AStructureBase::ServerUpdatePreviewRotation_Validate(FVector_NetQuantize Tr
 
 void AStructureBase::OnRep_CurrentTransform(FVector_NetQuantize Transform)
 {
-	SetActorTransform(FTransform(Transform.Rotation(), FVector(Transform.X, Transform.Y, Transform.Z)));
+	SetActorTransform(FTransform(GetActorRotation(), FVector(Transform.X, Transform.Y, Transform.Z)));
 	//SetActorLocation(FVector((static_cast<int>(Transform.X) / 50 * 50), (static_cast<int>(Transform.Y) / 50 * 50), Transform.Z));
 
 }
