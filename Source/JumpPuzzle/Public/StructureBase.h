@@ -70,22 +70,6 @@ struct FStructureValues : public  FTableRowBase
 
 };
 
-
-USTRUCT()
-struct FStructureDataRow : public FTableRowBase
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere)
-		FText DisplayName;
-
-	UPROPERTY(EditAnywhere)
-		float FlowerRadius = 0.5f;
-
-	UPROPERTY(EditAnywhere)
-		TArray<FDataTableRowHandle> ChildPlants;
-};
-
 UCLASS()
 class JUMPPUZZLE_API AStructureBase : public AActor
 {
