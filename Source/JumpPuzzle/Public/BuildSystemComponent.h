@@ -8,7 +8,9 @@
 #include <StructureBase.h>
 #include "InputMappingContext.h"
 #include <StructureManager.h>
+#include <GridPoint.h>
 #include "BuildSystemComponent.generated.h"
+
 
 
 
@@ -27,7 +29,7 @@ class JUMPPUZZLE_API UBuildSystemComponent : public UActorComponent
 		class UInputAction* PlaceBuildingAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-		class UInputAction* SecondaryRotateAction;
+		class UInputAction* MouseScrollAction;
 	
 
 public:	
@@ -67,8 +69,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleBuildMode(bool OverrideState, bool NewStateValue);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AddRotation(const FInputActionValue& Value);
+	virtual void AddRotation_Implementation(const FInputActionValue& Value);
 
 	UFUNCTION()
 	void PlaceStructure();
@@ -101,9 +104,14 @@ public:
 		FTransform PreviewTransform;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-		TArray < FStructureValues> Structures;
+		TArray <FStructureValues> Structures;
 
 	UPROPERTY(BlueprintReadOnly)
 		FHitResult PlayerViewHit;
 
+	UPROPERTY(BlueprintReadWrite)
+		TEnumAsByte<EPivotPoint> SelectedPivotPoint = EPivotPoint::Auto;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bShouldUpdatePreviewTransform = true;
 };

@@ -29,7 +29,7 @@ void AStructurePlacementDetector::BeginPlay()
 void AStructurePlacementDetector::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (ROLE_Authority) {
+	if (ROLE_Authority && BoxCollider != nullptr) {
 		FVector drawPos = BoxCollider->GetComponentToWorld().GetLocation();
 		FColor drawColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f).ToFColor(true);
 		float drawDuration = 0.0f;

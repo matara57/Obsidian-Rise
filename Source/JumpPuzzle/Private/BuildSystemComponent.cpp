@@ -10,6 +10,7 @@
 #include "StandardGameMode.h"
 #include "StandardCharacter.h"
 #include "Engine/World.h"
+#include <SocketableStructure.h>
 
 UBuildSystemComponent::UBuildSystemComponent()
 {
@@ -88,9 +89,9 @@ void UBuildSystemComponent::PreviewLoop() {
 	FVector TraceStart = LineStart;
 	FVector TraceEnd = LineEnd;
 
-	const FName TraceTag("MyTraceTag");
+	const FName TraceTag("PlayerLookTag");
 
-	GetWorld()->DebugDrawTraceTag = TraceTag;
+	//GetWorld()->DebugDrawTraceTag = TraceTag;
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.TraceTag = TraceTag;
@@ -101,11 +102,12 @@ void UBuildSystemComponent::PreviewLoop() {
 
 	if (PlayerViewHit.bBlockingHit && IsValid(PlayerViewHit.GetActor()))
 	{
-		if (StructureManager == nullptr || StructurePreview == nullptr || !StructurePreview->bShouldUpdatePreviewTransform) return;
+		if (StructureManager == nullptr || StructurePreview == nullptr || !bShouldUpdatePreviewTransform) return;
 		StructurePreview->OnRep_CurrentTransform(PlayerViewHit.Location);
 		StructurePreview->CurrentTransform = PlayerViewHit.Location;
 		/*StructurePreview->UpdatePreviewTransform(FVector_NetQuantize(PlayerViewHit.Location));
 		StructurePreview->ServerUpdatePreviewTransform(PlayerViewHit.Location);*/
+		//StructurePreview->SetActorRotation(FQuat(0.0f, 0.0f, 0.0f, 0.0f));
 	}
 }
 
@@ -124,6 +126,7 @@ void UBuildSystemComponent::ServerShowStructurePreview_Implementation(TSubclassO
 		StructurePreview->R_bIsPreview = true;
 		StructurePreview->SetAutonomousProxy(true);
 		UGameplayStatics::FinishSpawningActor(StructurePreview, StructurePreview->GetActorTransform());
+
 	}
 }
 
@@ -170,12 +173,25 @@ void UBuildSystemComponent::ToggleBuildMode(bool OverrideState, bool NewStateVal
 void UBuildSystemComponent::PlaceStructure()
 {
 	if (SelectedStructure == nullptr || StructurePreview == nullptr) return;
+	ASocketableStructure* SocketableStructure = Cast<ASocketableStructure>(StructurePreview);
+	if (SocketableStructure == nullptr) {
+		ServerPlaceStructure(SelectedStructure, StructurePreview->GetActorTransform());
+	}
+	else {
+		FHitResult adfg;
+		StructurePreview->K2_AddActorLocalOffset(StructurePreview->MeshComponent->GetRelativeLocation(), false, adfg, true);
+		
+		ServerPlaceStructure(SelectedStructure, StructurePreview->GetActorTransform());
+	}
 
-	ServerPlaceStructure(SelectedStructure, StructurePreview->GetActorTransform());
+
+	if (SocketableStructure == nullptr) return;
+	UClass* existingStructure = StructurePreview->GetClass();
+	//ServerShowStructurePreview(StructurePreview->GetClass());
 }
 
 
-void UBuildSystemComponent::AddRotation(const FInputActionValue& Value)
+void UBuildSystemComponent::AddRotation_Implementation(const FInputActionValue& Value)
 {
 	if (StructurePreview == nullptr) return;
 
@@ -205,7 +221,7 @@ void UBuildSystemComponent::SetupPlayerInputComponent(class UInputComponent* Pla
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 		EnhancedInputComponent->BindAction(PlaceBuildingAction, ETriggerEvent::Triggered, this, &UBuildSystemComponent::PlaceStructure);
 		EnhancedInputComponent->BindAction(BuildModeAction, ETriggerEvent::Triggered, this, FName("UBuildSystemComponent::ToggleBuildMode"));
-		EnhancedInputComponent->BindAction(SecondaryRotateAction, ETriggerEvent::Triggered, this, &UBuildSystemComponent::AddRotation);
+		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Triggered, this, &UBuildSystemComponent::AddRotation);
 	}
 }
 
