@@ -6,6 +6,22 @@
 #include "StructureBase.h"
 #include "SocketableStructure.generated.h"
 
+USTRUCT(BlueprintType)
+struct FStructureIntegrity
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float MaxSupport;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float MinSupport;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float VerticalLoss;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float HorizontalLoss;
+};
+
 /**
  * 
  */
@@ -25,5 +41,11 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bIsSocketed;
+
+	UFUNCTION(BlueprintCallable)
+	void PivotTo(EPivotPoint ToPivotPoint);
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FStructureIntegrity StructureIntegritySettings;
 
 };
